@@ -103,11 +103,11 @@ We tested the converter against these models using the [test.sh](test.sh) script
 
 ## Setup
 
-> torch2trt depends on the TensorRT Python API.  On Jetson, this is included with the latest JetPack.  For desktop, please follow the [TensorRT Installation Guide](https://docs.nvidia.com/deeplearning/tensorrt/install-guide/index.html).  You may also try installing torch2trt inside one of the NGC PyTorch docker containers for [Desktop](https://ngc.nvidia.com/catalog/containers/nvidia:pytorch) or [Jetson](https://ngc.nvidia.com/catalog/containers/nvidia:l4t-pytorch).
+> Note: torch2trt depends on the TensorRT Python API.  On Jetson, this is included with the latest JetPack.  For desktop, please follow the [TensorRT Installation Guide](https://docs.nvidia.com/deeplearning/tensorrt/install-guide/index.html).  You may also try installing torch2trt inside one of the NGC PyTorch docker containers for [Desktop](https://ngc.nvidia.com/catalog/containers/nvidia:pytorch) or [Jetson](https://ngc.nvidia.com/catalog/containers/nvidia:l4t-pytorch).
 
-### Option 1 - Without plugins
+### Step 1 - Install the torch2trt Python library
 
-To install without compiling plugins, call the following
+To install the torch2trt Python library, call the following
 
 ```bash
 git clone https://github.com/NVIDIA-AI-IOT/torch2trt
@@ -115,17 +115,30 @@ cd torch2trt
 python setup.py install
 ```
 
-### Option 2 - With plugins (experimental)
+### Step 2 (optional) - Install the torch2trt plugins library
 
-To install with plugins to support some operations in PyTorch that are not natviely supported with TensorRT, call the following
+To install the torch2trt plugins library, call the following
 
-> Please note, this currently only includes the interpolate plugin.  This plugin requires PyTorch 1.3+ for serialization.  
+```bash
+cmake -B build . && cmake --build build --target install && ldconfig
+```
+
+This includes support for some layers which may not be supported natively by TensorRT.  Once this library is found in the system, the associated layer converters in torch2trt are implicitly enabled.
+
+> Note: torch2trt now maintains plugins as an independent library compiled with CMake.  This makes compiled TensorRT engines more portable.  If needed, the deprecated plugins (which depend on PyTorch) may still be installed by calling ``python setup.py install --plugins``.
+
+### Step 3 (optional) - Install experimental community contributed features
+
+To install torch2trt with experimental community contributed features under ``torch2trt.contrib``, like Quantization Aware Training (QAT)(`requires TensorRT>=7.0`), call the following,      
 
 ```bash
 git clone https://github.com/NVIDIA-AI-IOT/torch2trt
-cd torch2trt
-sudo python setup.py install --plugins
+cd torch2trt/scripts    
+bash build_contrib.sh   
 ```
+  
+This enables you to run the QAT example located [here](examples/contrib/quantization_aware_training).   
+    
 
 ## How does it work?
 
